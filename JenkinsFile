@@ -22,7 +22,7 @@ pipeline {
         }
         stage ('git checkout'){
             steps{
-                sleep 300
+                
                sh ' ls -l '
    sh 'git clone https://github.com/bouda10/spring-boot-maven-example-helloworld'
 
