@@ -1,0 +1,33 @@
+// Uses Declarative syntax to run commands inside a container.
+pipeline {
+    agent {
+        kubernetes {
+            // Rather than inline YAML, in a multibranch Pipeline you could use: yamlFile 'jenkins-pod.yaml'
+            // Or, to avoid YAML:
+ containerTemplate(name: 'maven', image: 'maven:3.3.9-jdk-8-alpine', ttyEnabled: true, command: 'cat')
+
+
+
+            // Can also wrap individual steps:
+            // container('shell') {
+            //     sh 'hostname'
+            // }
+        }
+    }
+    stages {
+        stage('Main') {
+            steps {
+                sh 'hostname'
+            }
+        }
+        stage ('git checkout'){
+            steps{
+                sleep 300
+               sh ' ls -l '
+   git credentialsId: '8a1f7947-0bfc-46ea-8005-5c42a01f3ac0', url: 'https://github.com/bouda10/spring-boot-maven-example-helloworld'
+
+            
+        }
+    }
+}
+}
