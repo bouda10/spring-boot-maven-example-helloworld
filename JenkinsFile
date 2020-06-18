@@ -1,6 +1,6 @@
 // Uses Declarative syntax to run commands inside a container.
 pipeline {
-    agent {
+    agent  {
         kubernetes {
             // Rather than inline YAML, in a multibranch Pipeline you could use: yamlFile 'jenkins-pod.yaml'
             // Or, to avoid YAML:
@@ -17,6 +17,7 @@ pipeline {
     stages {
         stage('Main') {
             steps {
+			cleanWs()
                 sh 'hostname'
             }
         }
@@ -24,7 +25,16 @@ pipeline {
             steps{
                 sleep 60
                sh ' ls -l '
-   git credentialsId: '', url: 'https://github.com/bouda10/spring-boot-maven-example-helloworld'
+   git credentialsId: 'GIT', url: 'https://github.com/bouda10/spring-boot-maven-example-helloworld.git'
+   
+
+            
+        }
+    }
+	 stage ('maven'){
+            steps{
+             sh 'mvn clean install'
+   
 
             
         }
