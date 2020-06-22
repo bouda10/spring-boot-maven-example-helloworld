@@ -1,43 +1,47 @@
-// Uses Declarative syntax to run commands inside a container.
-pipeline {
-    agent  {
-        kubernetes {
-            // Rather than inline YAML, in a multibranch Pipeline you could use: yamlFile 'jenkins-pod.yaml'
-            // Or, to avoid YAML:
- containerTemplate(name: 'maven', image: 'maven:3.3.9-jdk-8-alpine', ttyEnabled: true, command: 'cat')
+podTemplate(label: 'mypod', containers: [
+    containerTemplate(name: 'git', image: 'alpine/git', ttyEnabled: true, command: 'cat'),
+    containerTemplate(name: 'maven', image: 'maven:3.3.9-jdk-8-alpine', command: 'cat', ttyEnabled: true),
+    containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true ,envVars: [containerEnvVar(key: 'DOCKER_OPTS', value: '--insecure-registry="minikube.do:5000"')]),
+     containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl', command: 'cat', ttyEnabled: true),
 
-
-
-            // Can also wrap individual steps:
-            // container('shell') {
-            //     sh 'hostname'
-            // }
-        }
-    }
-    stages {
-        stage('Main') {
-            steps {
-			cleanWs()
-                sh 'hostname'
-            }
-        }
-        stage ('git checkout'){
-            steps{
-                sleep 60
-               sh ' ls -l '
-   git credentialsId: 'GIT', url: 'https://github.com/bouda10/spring-boot-maven-example-helloworld.git'
-   
-
-            
-        }
-    }
-	 stage ('maven'){
-            steps{
-             sh 'mvn clean install'
-   
-
-            
-        }
-    }
-}
-}
+  ],
+  volumes: [
+    hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
+    hostPathVolume(mountPath: '/.kube/config', hostPath: '/etc/kubernetes/admin.conf'),
+  ]
+  ) {
+      node('mypod'){
+	    stage('Initialization'){
+		sh'echo "${WORKSPACE}"'
+		cleanWs()
+		}
+		stage('Git checkout'){
+		container('git'){
+		git credentialsId: 'bouda', url: 'https://github.com/bouda10/spring-boot-maven-example-helloworld.git'
+		
+		}
+		}
+		stage('build'){
+		container('maven'){
+		sh 'mvn clean install'
+		}
+		
+		}
+		stage('docker'){
+		sh'docker build -t nexus.do/demo:latest'
+		sh 'docker login nexus.do --username=admin --password=admin123'
+		sh 'docker push nexus.do/demo:latest'
+		
+		}
+		
+		stage('deployment'){
+		container('kubectl'){
+		sh'kubectl apply -f bouda-deploy.yaml'
+		sh 'kubectl expose deployment bouda --type=NodePort --port=8080 -n dev'
+		}
+		}
+	  
+	  
+	  
+	    }
+	  }
