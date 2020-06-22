@@ -29,10 +29,11 @@ podTemplate(label: 'mypod', containers: [
 		
 		}
 		stage('docker'){
+		container('docker'){
 		sh'docker build -t nexus.do/demo:latest'
 		sh 'docker login nexus.do --username=admin --password=admin123'
 		sh 'docker push nexus.do/demo:latest'
-		
+		}
 		}
 		
 		stage('deployment'){
