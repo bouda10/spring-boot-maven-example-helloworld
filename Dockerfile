@@ -5,4 +5,5 @@ LABEL env="qe"
 USER spring:spring
 ARG JAR_FILE=target/*.war
 COPY ${JAR_FILE} app.war
-ENTRYPOINT ["java","-jar","/app.war"]
+ENTRYPOINT ["java"]
+CMD ["-jar","/app.war"]
