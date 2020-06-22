@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: bouda
-        image: nexus.do/bouda:latest
+        image: dockerreg91.azurecr.io/test-script:latest
         ports:
         - containerPort: 8080
       imagePullSecrets:
