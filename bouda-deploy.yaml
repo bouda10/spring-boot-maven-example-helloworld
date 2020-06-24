@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: bouda
-        image: ${imageName}
+        image: ${imageName}-${BUILD_NUMBER}
         ports:
         - containerPort: 8080
       imagePullSecrets:
